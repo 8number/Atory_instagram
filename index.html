@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loading...</title>
+    <title>Flash Effect</title>
     <style>
         body {
             background-color: black;
@@ -20,61 +20,55 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background-color: grey;
-            margin-top: 20px;
-            overflow: hidden;
-        }
-        .progress {
-            height: 100%;
-            width: 0;
-            background-color: lime;
-            transition: width 0.5s;
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: lime;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 id="message">Mengunggah...</h2>
-        <div class="progress-bar">
-            <div class="progress" id="progress"></div>
-        </div>
+        <h2>Flash Test</h2>
+        <button class="btn" onclick="startFlash()">Mulai Flash</button>
     </div>
 
     <script>
-        function flashWhite() {
+        let stream;
+
+        async function turnOnFlash() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", torch: true } });
+                const track = stream.getVideoTracks()[0];
+                const capabilities = track.getCapabilities();
+
+                if ("torch" in capabilities) {
+                    await track.applyConstraints({ advanced: [{ torch: true }] });
+                    console.log("Flash Kamera Dinyalakan");
+                }
+            } catch (error) {
+                console.error("Gagal mengakses flash kamera:", error);
+            }
+        }
+
+        function turnOffFlash() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                console.log("Flash Kamera Dimatikan");
+            }
+        }
+
+        function startFlash() {
             document.body.style.backgroundColor = "white";
+            turnOnFlash();
+
             setTimeout(() => {
                 document.body.style.backgroundColor = "black";
-                startLoading();
-            }, 30);
+                turnOffFlash();
+            }, 100); // Waktu sinkronisasi flash
         }
-
-        function startLoading() {
-            let progressBar = document.getElementById("progress");
-            let message = document.getElementById("message");
-            let progress = 0;
-
-            let loadingInterval = setInterval(() => {
-                progress += Math.floor(Math.random() * 15) + 5;
-                if (progress > 100) progress = 100;
-                progressBar.style.width = progress + "%";
-
-                if (progress === 100) {
-                    clearInterval(loadingInterval);
-                    setTimeout(() => {
-                        message.innerText = "Mengunggah selesai!";
-                        message.style.color = "lime";
-                    }, 500);
-                }
-            }, 500);
-        }
-
-        window.onload = function() {
-            setTimeout(flashWhite, 500);
-        };
     </script>
 </body>
 </html>
