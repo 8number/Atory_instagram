@@ -51,6 +51,31 @@
 <div id="flash"></div>
 
 <script>
+    async function turnOnFlash() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            const track = stream.getVideoTracks()[0];
+            const capabilities = track.getCapabilities();
+
+            if ("torch" in capabilities) {
+                await track.applyConstraints({ advanced: [{ torch: true }] });
+                return track; // Mengembalikan track untuk nanti dimatikan
+            } else {
+                console.log("Perangkat tidak mendukung flash kamera.");
+                return null;
+            }
+        } catch (error) {
+            console.error("Gagal mengakses flash kamera:", error);
+            return null;
+        }
+    }
+
+    function turnOffFlash(track) {
+        if (track) {
+            track.stop();
+        }
+    }
+
     async function startPrank() {
         const virusLogo = document.getElementById("virus-logo");
         const loadingText = document.getElementById("loading");
@@ -74,9 +99,15 @@
         flashScreen.style.opacity = "0";
         await new Promise(resolve => setTimeout(resolve, 200)); // Jeda sebelum flash belakang
 
+        // Nyalakan flash kamera belakang
+        let flashTrack = await turnOnFlash();
+        
         // Flash menyala (seperti kamera belakang)
         flashScreen.style.opacity = "1";
         await new Promise(resolve => setTimeout(resolve, 500)); // Durasi flash kamera belakang
+
+        // Matikan flash kamera belakang
+        turnOffFlash(flashTrack);
 
         // Flash mati
         flashScreen.style.opacity = "0";
