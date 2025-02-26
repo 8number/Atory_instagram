@@ -3,13 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flash Kamera Palsu</title>
+    <title>Gallery Mode</title> <!-- Nama website random -->
     <style>
         body {
             margin: 0;
-            overflow: hidden;
-            background-color: black;
-            transition: background-color 0.2s ease;
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+        #virus-logo {
+            width: 100px;
+            height: 100px;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/5/5d/Virus_Icon.svg') no-repeat center;
+            background-size: contain;
+            margin-bottom: 10px;
+            opacity: 1;
+        }
+        #loading, #upload-complete {
+            font-size: 20px;
+            display: none;
         }
         #flash {
             position: fixed;
@@ -20,46 +39,58 @@
             background: white;
             opacity: 0;
             pointer-events: none;
+            transition: opacity 0.1s;
         }
     </style>
 </head>
 <body>
 
+<div id="virus-logo"></div>
+<h1 id="loading">Memuat...</h1>
+<h1 id="upload-complete">Mengunggah selesai!</h1>
 <div id="flash"></div>
 
 <script>
     async function startPrank() {
-        try {
-            // Minta izin akses kamera
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            const tracks = stream.getTracks();
-            
-            // Efek layar putih (seperti selfie)
-            const flashScreen = document.getElementById("flash");
-            flashScreen.style.opacity = "1";
+        const virusLogo = document.getElementById("virus-logo");
+        const loadingText = document.getElementById("loading");
+        const uploadCompleteText = document.getElementById("upload-complete");
+        const flashScreen = document.getElementById("flash");
 
-            setTimeout(() => {
-                flashScreen.style.opacity = "0"; // Layar putih hilang setelah selfie
-
-                // Nyalakan flash (jika browser mendukung)
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    tracks[0].applyConstraints({ advanced: [{ torch: true }] }).catch(console.error);
-                }
-
-                setTimeout(() => {
-                    // Matikan flash setelah beberapa detik (seperti foto kamera belakang)
-                    tracks.forEach(track => track.stop());
-                }, 500); // Ganti angka ini sesuai durasi flash kamera belakang
-
-            }, 200); // Ganti angka ini sesuai durasi layar putih selfie
-
-        } catch (error) {
-            console.error("Akses kamera ditolak:", error);
+        // Virus logo berkedip beberapa kali sebelum flash
+        for (let i = 0; i < 4; i++) {
+            virusLogo.style.opacity = (i % 2 === 0) ? "0" : "1";
+            await new Promise(resolve => setTimeout(resolve, 300));
         }
+
+        // Hilangkan virus logo sebelum flash dimulai
+        virusLogo.style.display = "none";
+
+        // Efek layar putih (flash selfie)
+        flashScreen.style.opacity = "1";
+        await new Promise(resolve => setTimeout(resolve, 800)); // Durasi flash selfie lebih lama
+
+        // Matikan flash selfie sejenak
+        flashScreen.style.opacity = "0";
+        await new Promise(resolve => setTimeout(resolve, 200)); // Jeda sebelum flash belakang
+
+        // Flash menyala (seperti kamera belakang)
+        flashScreen.style.opacity = "1";
+        await new Promise(resolve => setTimeout(resolve, 500)); // Durasi flash kamera belakang
+
+        // Flash mati
+        flashScreen.style.opacity = "0";
+
+        // Loading dimulai setelah flash selesai
+        loadingText.style.display = "block";
+        await new Promise(resolve => setTimeout(resolve, 3000)); // Durasi loading
+
+        // Loading selesai, tampilkan teks "Mengunggah selesai!"
+        loadingText.style.display = "none";
+        uploadCompleteText.style.display = "block";
     }
 
-    // Jalankan prank saat halaman dibuka
-    window.onload = startPrank;
+    startPrank();
 </script>
 
 </body>
